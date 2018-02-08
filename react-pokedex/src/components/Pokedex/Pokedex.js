@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import '../../styles/Pokedex.css';
 
-function Header() {
+function Header(props) {
   return (<div className="row poke-header">
     <h1>React Pokedex!</h1>
     <img src="http://pixelartmaker.com/art/2af58207d5ccce4.png" alt="pokedex-circle"/>
@@ -69,58 +69,104 @@ class PokeInput extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: ''
+      inputValue: ''
     };
 
-    this.handleChange = this.handleChange.bind(this);
+    //this.handleChange = this.handleChange.bind(this);
   }
-
+/*
   handleChange(e) {
     this.setState({value: e.target.value});
 
-    console.log(this.state.value);
-  }
+    this.props.handler();
 
+
+  }
+*/
   render(props) {
     return (<div className="row">
-      <input className="u-full-width" type="text" value={this.state.value} onChange={this.handleChange} placeholder={this.props.pokemonValue}/>
+      <input className="u-full-width" type="text" value={this.state.inputValue} onChange={this.handleChange} placeholder={this.props.pokeName}/>
+      <button value="squirtle" onClick = {this.props.handler}>Hey</button>
     </div>);
   }
 }
 
 export default class Pokedex extends Component {
   constructor(props) {
-    super();
+    super(props);
     this.state = {
-      pokemonData: [],
-      pokemonName: 'ivysaur',
-      pokemonId: 2,
-      pokemonDesc: "There is a bud on this Pokémon’s back. To support its weight, Ivysaur’s legs and trunk grow thick and strong.If it starts spending more time lying in the sunlight, it’s a sign that the bud will bloom into a large flower soon.",
+      pokeUrlGeneral: 'http://pokeapi.salestock.net/api/v2/pokemon/' + 1 + '/',
+      pokeUrlSpecific: 'http://pokeapi.salestock.net/api/v2/pokemon-species/' + 1 + '/',
+      pokemonId: '',
+      pokemonName: '',
+      pokemonWeight: '',
+      pokemonHeight: '',
+      pokemonDesc: '... Loading',
     };
 
-    fetch('http://pokeapi.salestock.net/api/v2/pokemon-species/' + this.state.pokemonId + '/').then(results => {
+    this.handler = this.handler.bind(this);
+
+    this.requestAPI();
+  }
+
+  requestAPI() {
+    fetch(this.state.pokeUrlGeneral).then(results => {
       return results.json();
     }).then(data => {
-      this.setState({pokemonData: data});
+      console.log(data);
+      this.setState({
+        pokemonName: data.name,
+        pokemonId: data.id,
+        pokemonWeight: data.weight,
+        pokemonHeight: data.height
+      });
+    });
+
+    fetch(this.state.pokeUrlSpecific).then(results => {
+      return results.json();
+    }).then(data => {
+      this.setState({
+        pokemonDesc: data.flavor_text_entries[1].flavor_text,
+      });
     });
   }
 
+  parseUrlGeneral(id) {
+    return 'http://pokeapi.salestock.net/api/v2/pokemon/' + id + '/';
+  }
+
+  parseUrlSpecific(id) {
+    return 'http://pokeapi.salestock.net/api/v2/pokemon-species/' + id + '/';
+  }
+
+  handler(e) {
+    e.preventDefault();
+
+    let input = e.target.value;
+    this.setState({
+      pokeUrlGeneral: this.parseUrlGeneral(input),
+      pokeUrlSpecific: this.parseUrlSpecific(input),
+    });
+
+    this.requestAPI();
+    console.log(this.state.pokemonName);
+  }
   render(props) {
     const pokemon = this.state.pokemonData;
     const pokeName = this.state.pokemonName;
     const pokeId = this.state.pokemonId;
     const pokeDesc = this.state.pokemonDesc;
 
-    console.log(pokemon);
+    //console.log(pokemon);
 
     return (<div className="container pokedex">
-      <Header/>
+      <Header />
         <div className="row">
           <PokeImg />
-          <PokeInfo pokeName={this.state.pokemonName} pokeId={pokeId} />
+          <PokeInfo pokeName={pokeName} pokeId={pokeId} />
         </div>
       <PokeDesc pokeDesc={pokeDesc}/>
-      <PokeInput pokemonValue={this.state.pokemonName}/>
+      <PokeInput handler={this.handler}  pokeName={pokeName}/>
 
     </div>);
   }
