@@ -1,0 +1,130 @@
+.pokedex {
+  text-align: center;
+  border-bottom: 2px solid #ee1515;
+}
+
+input[type=text] {
+  outline: 0;
+}
+
+input[type=text]:focus {
+  border-color: #ee1515;
+}
+
+.poke-header {
+  font-family: pocketMonk;
+  border-radius: 2px 2px 30px 30px;
+  background-color: #ee1515;
+  margin-bottom: 20px;
+}
+
+.poke-img-main {
+  height: 475px;
+  width: 475px;
+}
+
+.poke-header h1 {
+  display: inline-block;
+  float: left;
+  color: white;
+  padding-left: 8%;
+  vertical-align: middle;
+  line-height: 80px;
+  margin-bottom: 0px;
+}
+
+.poke-header img {
+  display: inline-block;
+  height: 50px;
+  width: 50px;
+  float: right;
+  padding-right: 8%;
+}
+
+.poke-name-con {
+  border: 1px solid #000000;
+  border-radius: 10px;
+}
+
+.poke-name-con .row {
+  height: 40px;
+  border-radius: 10px 10px 0 0;
+}
+
+.poke-name {
+  background-color: #ee1515;
+  color: #ffffff;
+}
+
+.poke-name img {
+  height: 40px;
+  width: 40px;
+  display: inline-block;
+}
+
+.poke-name h6 {
+  display: inline-block;
+  font-size: 1.2em;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 40px;
+}
+
+.poke-alt-name h6 {
+  text-align: center;
+  vertical-align: middle;
+  line-height: 40px;
+}
+
+.poke-type-con {
+  width: 80%;
+  float: right;
+  padding: 0px;
+}
+
+.poke-type-con div {
+  display: inline-block;
+  border: 2px solid black;
+  background-color: #9400D3;
+  color: #ffffff;
+  margin: 5px;
+  height: 30px;
+  width: 100px;
+  border-radius: 5px;
+}
+
+
+.poke-type-con div h6 {
+  padding: 3px;
+  text-align: center;
+  display: inline-block;
+}
+
+.poke-body-con {
+  width: 245px;
+  height: 80px;
+  float: right;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.poke-body-con div:nth-child(1) {
+  border-bottom: 1px dotted black;
+}
+
+.poke-body-con h6 {
+  display: inline-block;
+  vertical-align: middle;
+  float: right;
+  line-height: 40px;
+  margin-bottom: 0px;
+  padding-right: 15px;
+}
+
+.poke-body-con span {
+  float: left;
+  vertical-align: middle;
+  line-height: 40px;
+  margin-bottom: 0px;
+  padding-left: 15px;
+}

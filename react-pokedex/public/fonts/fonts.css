@@ -1,0 +1,29 @@
+@font-face {
+font-family: pokemon_GB;
+src: url(./Pokemon_GB.ttf);
+}
+
+@font-face {
+font-family: unknown_GB;
+src: url(./unknown_GB.ttf);
+}
+
+@font-face {
+font-family: pocketMonk;
+src: url(./PocketMonk.otf);
+}
+
+@font-face {
+font-family: pokIcon1;
+src: url(./pokeSprites/POKPIX1.ttf);
+}
+
+@font-face {
+font-family: pokIcon2;
+src: url(./pokeSprites/POKPIX2.ttf);
+}
+
+@font-face {
+font-family: pokIcon3;
+src: url(./pokeSprites/POKPIX3.ttf);
+}
