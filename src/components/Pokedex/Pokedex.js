@@ -120,7 +120,7 @@ function PokeInfo(props) {
       <div className="row poke-name">
 
         <img src="http://pixelartmaker.com/art/797ff81281c7a32.png" alt="pixel_poke"/>
-        <h6>#{props.pokeId}{capitalizeFirstLetter(props.pokeName)}</h6>
+        <h6>#{props.pokeId}| {capitalizeFirstLetter(props.pokeName)}</h6>
       </div>
       <div className="row poke-alt-name">
         <h6>{capitalizeFirstLetter(props.pokeGen)}</h6>
@@ -146,7 +146,7 @@ function PokeInfo(props) {
 function PokeDesc(props) {
   return (<div className="row">
     <h2>Pokemon description</h2>
-    <p>{props.pokeDesc}</p>
+    <p style={{ textAlign: 'left' }}>{props.pokeDesc}</p>
   </div>);
 }
 
@@ -168,8 +168,8 @@ class PokeInput extends Component {
 
   handleEnter(e) {
     if (e.key === 'Enter') {
-      this.props.updatePokemon(e);
       this.setState({inputValue: ''});
+      this.props.updatePokemon(e);
       console.log('Input field input confirmation')
     } else {
       return;
@@ -178,7 +178,7 @@ class PokeInput extends Component {
 
   render(props) {
     return (<div className="row">
-      <input className="u-full-width" type="text" onChange={this.handleChange} onKeyUp={this.handleEnter} placeholder="Pokemon name or #"/>
+      <input className="u-full-width" value={this.state.inputValue} type="text" onChange={this.handleChange} onKeyUp={this.handleEnter} placeholder="Pokemon name or #"/>
     </div>);
   }
 }
@@ -186,9 +186,10 @@ class PokeInput extends Component {
 export default class Pokedex extends Component {
   constructor(props) {
     super(props);
+    // http://pokeapi.salestock.net/api/v2/pokemon/1/
     this.state = {
-      pokeUrlGeneral: 'http://pokeapi.salestock.net/api/v2/pokemon/1/',
-      pokeUrlSpecific: 'http://pokeapi.salestock.net/api/v2/pokemon-species/1/',
+      pokeUrlGeneral: 'https://pokeapi.co/api/v2/pokemon/1/',
+      pokeUrlSpecific: 'https://pokeapi.co/api/v2/pokemon-species/1/',
       pokemonId: '',
       pokemonName: '',
       pokemonWeight: '',
@@ -196,7 +197,6 @@ export default class Pokedex extends Component {
       pokemonGen: '',
       pokemonDesc: '... Loading',
       pokemonTypes: [],
-      pokeErr: false,
     };
 
     this.handleErrors = this.handleErrors.bind(this);
@@ -209,11 +209,15 @@ export default class Pokedex extends Component {
 
   handleErrors(response) {
     if (!response.ok) {
-      this.setState({pokeErr: true});
+      this.setState({
+        pokemonName: 'Nonexistant',
+        pokemonId: '0',
+        pokemonGen: 'Generation 0',
+        pokemonDesc: 'None'
+      });
       throw Error(response.statusText);
       return;
     }
-    this.setState({pokeErr: false});
     return response;
   }
 
@@ -235,8 +239,16 @@ export default class Pokedex extends Component {
     fetch(this.state.pokeUrlSpecific).then(this.handleErrors).then(results => {
       return results.json();
     }).then(data => {
+      let flavorText = data.flavor_text_entries;
+
+      for(let i=0; i < flavorText.length; i++) {
+        if(flavorText[i].language.name === "en" && flavorText[i].version.name === "alpha-sapphire") {
+          this.setState({ pokemonDesc: flavorText[i].flavor_text })
+        }
+      }
+
       this.setState((prevState, props) => ({
-        pokemonDesc: data.flavor_text_entries[1].flavor_text, pokemonGen: data.generation.name
+        pokemonGen: data.generation.name,
       }));
       console.log('Specific Pokemon Data: ', data);
     }).catch(error => {
@@ -247,9 +259,9 @@ export default class Pokedex extends Component {
 
   parseUrl(id, type) {
     if (type === 'general') {
-      return 'http://pokeapi.salestock.net/api/v2/pokemon/' + id + '/';
+      return 'https://pokeapi.co/api/v2/pokemon/' + id + '/';
     } else if (type === 'specific') {
-      return 'http://pokeapi.salestock.net/api/v2/pokemon-species/' + id + '/';
+      return 'https://pokeapi.co/api/v2/pokemon-species/' + id + '/';
     } else {
       console.log('Choose a API selector url');
     }
@@ -262,6 +274,8 @@ export default class Pokedex extends Component {
     this.setState({
       pokeUrlGeneral: this.parseUrl(input, 'general'),
       pokeUrlSpecific: this.parseUrl(input, 'specific'),
+      pokemonGen: 'Loading ...',
+      pokemonDesc: 'Loading ...'
     }, this.requestAPI);
   }
 
@@ -277,7 +291,7 @@ export default class Pokedex extends Component {
 
     return (<div className="container pokedex">
       {
-        pokeName && pokeDesc && pokeImg ?
+        pokeImg && pokeDesc && pokeName &&  pokeGen && pokeTypes ?
         (<div>
             <Header/>
             <div className="row">
