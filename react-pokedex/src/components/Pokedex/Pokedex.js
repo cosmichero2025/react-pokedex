@@ -15,27 +15,103 @@ function PokeImg(props) {
 }
 
 function TypesListItem(props) {
-  console.log('Hey: ' + props.value);
-  return (
-    <li>
-    <div>
+
+  let typeColor = 'black';
+
+  switch (props.value) {
+    case 'normal':
+      typeColor = '#A8A77A';
+      break;
+    case 'fire':
+      typeColor = '#EE8130';
+      break;
+
+    case 'water':
+      typeColor = '#6390F0';
+      break;
+
+    case 'electric':
+      typeColor = '#F7D02C';
+      break;
+
+    case 'grass':
+      typeColor = '#7AC74C';
+      break;
+
+    case 'ice':
+      typeColor = '#96D9D6';
+      break;
+
+    case 'fighting':
+      typeColor = '#C22E28';
+      break;
+
+    case 'poison':
+      typeColor = '#A33EA1';
+      break;
+
+    case 'ground':
+      typeColor = '#E2BF65';
+      break;
+
+    case 'flying':
+      typeColor = '#A98FF3';
+      break;
+
+    case 'psychic':
+      typeColor = '#F95587';
+      break;
+
+    case 'bug':
+      typeColor = '#A6B91A';
+      break;
+
+    case 'rock':
+      typeColor = '#B6A136';
+      break;
+
+    case 'ghost':
+      typeColor = '#735797';
+      break;
+
+    case 'dragon':
+      typeColor = '#6F35FC';
+      break;
+
+    case 'dark':
+      typeColor = '#705746';
+      break;
+
+    case 'stell':
+      typeColor = '#B7B7CE';
+      break;
+
+    case 'fairy':
+      typeColor = '#D685AD';
+      break;
+
+    default:
+      typeColor = '#ee1515';
+  }
+
+  return (<li>
+    <div style={{
+        backgroundColor: typeColor
+      }}>
       <h6>{props.value}</h6>
     </div>
-  </li>
-);
+  </li>);
 }
 
 function TypeList(props) {
   const pokemonTypes = props.pokeTypes;
-  console.log(pokemonTypes);
-  const pokeTypesList = pokemonTypes.map((typeI) =>
-  <TypesListItem key={typeI.type.name} value={typeI.type.name}/>
-  );
+
+  const pokeTypesList = pokemonTypes.map((typeI) => <TypesListItem key={typeI.type.name} value={typeI.type.name}/>);
   return (<ul>{pokeTypesList}</ul>);
 }
 
 function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function PokeInfo(props) {
@@ -44,11 +120,10 @@ function PokeInfo(props) {
       <div className="row poke-name">
 
         <img src="http://pixelartmaker.com/art/797ff81281c7a32.png" alt="pixel_poke"/>
-        <h6 style={{float: 'left'}}>#{props.pokeId}</h6>
-        <h6>{capitalizeFirstLetter(props.pokeName)}</h6>
+        <h6>#{props.pokeId}{capitalizeFirstLetter(props.pokeName)}</h6>
       </div>
       <div className="row poke-alt-name">
-        <h6>Entrancing Pokemon</h6>
+        <h6>{capitalizeFirstLetter(props.pokeGen)}</h6>
       </div>
     </div>
     <div className="row poke-type-con">
@@ -94,9 +169,10 @@ class PokeInput extends Component {
   handleEnter(e) {
     if (e.key === 'Enter') {
       this.props.updatePokemon(e);
-      console.log('Did it');
+      this.setState({inputValue: ''});
+      console.log('Input field input confirmation')
     } else {
-      console.log('nah');
+      return;
     }
   }
 
@@ -117,34 +193,55 @@ export default class Pokedex extends Component {
       pokemonName: '',
       pokemonWeight: '',
       pokemonHeight: '',
+      pokemonGen: '',
       pokemonDesc: '... Loading',
-      pokemonTypes: []
+      pokemonTypes: [],
+      pokeErr: false,
     };
 
+    this.handleErrors = this.handleErrors.bind(this);
     this.updatePokemon = this.updatePokemon.bind(this);
+  }
 
+  componentDidMount() {
     this.requestAPI();
+  }
+
+  handleErrors(response) {
+    if (!response.ok) {
+      this.setState({pokeErr: true});
+      throw Error(response.statusText);
+      return;
+    }
+    this.setState({pokeErr: false});
+    return response;
   }
 
   requestAPI() {
     console.log('API request');
-    fetch(this.state.pokeUrlGeneral).then(results => {
+
+    fetch(this.state.pokeUrlGeneral).then(this.handleErrors).then(results => {
       return results.json();
     }).then(data => {
-      const pokeArrayNew = [];
-
-
-
-      this.setState({pokemonName: data.name, pokemonId: data.id, pokemonWeight: data.weight, pokemonHeight: data.height, pokemonTypes: data.types});
-
-      console.log('General', data);
+      this.setState((prevState, props) => ({
+          pokemonName: data.name, pokemonId: data.id, pokemonWeight: data.weight, pokemonHeight: data.height, pokemonTypes: data.types
+      }));
+      console.log('General Pokemon Data: ', data);
+    }).catch(error => {
+      console.log('General Error: ', error);
+      return;
     });
 
-    fetch(this.state.pokeUrlSpecific).then(results => {
+    fetch(this.state.pokeUrlSpecific).then(this.handleErrors).then(results => {
       return results.json();
     }).then(data => {
-      this.setState({pokemonDesc: data.flavor_text_entries[1].flavor_text});
-      console.log('Specific', data);
+      this.setState((prevState, props) => ({
+        pokemonDesc: data.flavor_text_entries[1].flavor_text, pokemonGen: data.generation.name
+      }));
+      console.log('Specific Pokemon Data: ', data);
+    }).catch(error => {
+      console.log('Specific Error: ', error);
+      return;
     });
   }
 
@@ -154,7 +251,7 @@ export default class Pokedex extends Component {
     } else if (type === 'specific') {
       return 'http://pokeapi.salestock.net/api/v2/pokemon-species/' + id + '/';
     } else {
-      console.log('Not a right id');
+      console.log('Choose a API selector url');
     }
   }
 
@@ -164,10 +261,10 @@ export default class Pokedex extends Component {
     let input = e.target.value;
     this.setState({
       pokeUrlGeneral: this.parseUrl(input, 'general'),
-      pokeUrlSpecific: this.parseUrl(input, 'specific')
-    });
-    this.requestAPI();
+      pokeUrlSpecific: this.parseUrl(input, 'specific'),
+    }, this.requestAPI);
   }
+
   render(props) {
     const pokeName = this.state.pokemonName;
     const pokeId = this.state.pokemonId;
@@ -175,16 +272,17 @@ export default class Pokedex extends Component {
     const pokeHeight = this.state.pokemonHeight;
     const pokeDesc = this.state.pokemonDesc;
     const pokeTypes = this.state.pokemonTypes;
+    const pokeGen = this.state.pokemonGen;
     const pokeImg = 'https://img.pokemondb.net/artwork/' + pokeName + '.jpg';
 
     return (<div className="container pokedex">
       {
-        pokeName
-          ? (<div>
+        pokeName && pokeDesc && pokeImg ?
+        (<div>
             <Header/>
             <div className="row">
               <PokeImg pokeImg={pokeImg}/>
-              <PokeInfo pokeName={pokeName} pokeId={pokeId} pokeTypes={pokeTypes} pokeWeight={pokeWeight} pokeHeight={pokeHeight}/>
+              <PokeInfo pokeName={pokeName} pokeGen={pokeGen} pokeId={pokeId} pokeTypes={pokeTypes} pokeWeight={pokeWeight} pokeHeight={pokeHeight}/>
             </div>
             <PokeDesc pokeDesc={pokeDesc}/>
             <PokeInput updatePokemon={this.updatePokemon} pokeName={pokeName}/>
